@@ -1,0 +1,124 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-test-plus"
+version = "2.7.0"
+description = "django-test-plus provides useful additions to Django's default TestCase"
+authors = [
+    { name = "Frank Wiles", email = "frank@revsys.com" },
+    { name = "Jeff Triplett", email = "jeff@revsys.com" },
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Web Environment",
+    "Framework :: Django",
+    "Framework :: Django :: 4.2",
+    "Framework :: Django :: 5.0",
+    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
+    "Framework :: Django :: 6.1",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
+    "Programming Language :: Python :: Free Threading :: 3 - Stable",
+]
+dependencies = []
+requires-python = ">=3.11"
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.urls]
+Changelog = "https://github.com/revsys/django-test-plus/blob/main/CHANGELOG.md"
+Documentation = "https://django-test-plus.readthedocs.io"
+Homepage = "https://github.com/revsys/django-test-plus/"
+
+[project.entry-points]
+pytest11 = { test_plus = "test_plus.plugin" }
+
+[project.optional-dependencies]
+docs = ["zensical", "mkdocstrings-python"]
+lint = ["prek"]
+test = ["factory-boy", "pytest", "pytest-cov", "pytest-django"]
+testing = ["django-test-plus[test]"]
+
+[tool.bumpver]
+current_version = "2.7.0"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "Bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = ['current_version = "{version}"', 'version = "{version}"']
+
+[tool.coverage.paths]
+source = ["test_plus"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if DEBUG:",
+    "if not DEBUG:",
+    "if settings.DEBUG:",
+    "if TYPE_CHECKING:",
+    'def __str__\(self\)\s?\-?\>?\s?\w*\:',
+]
+# Consolidating .coveragerc into this file turned fail_under on for the first
+# time: .coveragerc won precedence and had no [report] section, so the old
+# value of 75 was never enforced. Set to today's number so the gate is real,
+# and raise it as coverage improves.
+fail_under = 60
+
+[tool.coverage.run]
+omit = [
+    "docs/*",
+    "test_project/*",
+    "test_plus/compat.py",
+]
+source = ["test_plus"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["test_plus"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/test_plus",
+    "/CHANGELOG.md",
+    "/README.md",
+]
+
+[tool.isort]
+profile = "black"
+honor_noqa = true
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint.per-file-ignores]
+# Django declares these as plain class attributes by convention; ClassVar
+# annotations would be wrong here (migrations are generated code).
+"**/migrations/*.py" = ["RUF012"]
+"**/forms.py" = ["RUF012"]
+"**/models.py" = ["RUF012"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "test_project.settings"
+# addopts = "--reuse-db --cov"
+addopts = "--reuse-db"
+norecursedirs = ".* build dist docs .eggs/* *.egg-info htmlcov test_plus .git .tox"
+python_files = "test*.py *_tests.py"
+pythonpath = ["test_project"]
+testpaths = ["test_project"]
